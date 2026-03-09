@@ -1,0 +1,50 @@
+JOHN DOE
+john.doe@example.com
++1 (555) 987-6543
+San Francisco, CA
+
+PROFESSIONAL SUMMARY
+Experienced Full Stack Developer with 5+ years of expertise in building scalable web applications using modern technologies.
+
+TECHNICAL SKILLS
+Programming Languages: Python, JavaScript, TypeScript, Java
+Frontend: React, Vue, Angular, Next.js, HTML, CSS, Tailwind, Bootstrap
+Backend: Node.js, Express, Flask, Django, FastAPI
+Databases: SQL, PostgreSQL, MySQL, MongoDB, Redis, Firebase
+Cloud & DevOps: AWS, Azure, Docker, Kubernetes, Terraform, Jenkins, CI/CD
+Tools: Git, GitHub, GitLab, Jira, Confluence, Slack
+Other: REST API, GraphQL, WebSocket, Testing, Jest, Pytest
+
+WORK EXPERIENCE
+
+Senior Full Stack Developer - Tech Corp
+January 2021 - Present
+- Led development of microservices architecture using Docker and Kubernetes
+- Built React frontend applications with TypeScript
+- Implemented CI/CD pipelines using Jenkins
+- Mentored junior developers on best practices
+
+Full Stack Developer - StartupXYZ
+June 2019 - December 2020
+- Developed Python Flask APIs for mobile applications
+- Created responsive React dashboards
+- Set up AWS infrastructure
+- Implemented automated testing with Jest and Pytest
+
+Junior Developer - TechAgency
+January 2018 - May 2019
+- Built websites using HTML, CSS, JavaScript
+- Worked with PostgreSQL databases
+- Collaborated with design team
+
+EDUCATION
+Bachelor of Computer Science
+State University, 2017
+
+CERTIFICATIONS
+AWS Solutions Architect Associate
+Docker Certified Associate
+
+PROJECTS
+VidyaMitra - AI-powered skill assessment platform (React, FastAPI, PostgreSQL)
+EasePay - Payment processing application (Node.js, MongoDB, AWS)

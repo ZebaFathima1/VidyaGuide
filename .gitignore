@@ -1,0 +1,80 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependencies
+.next/
+.nuxt/
+.cache/
+.output/
+.vuepress/dist/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# OS Files
+Thumbs.db
+.DS_Store
+
+# Build artifacts
+/dist/
+/build/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Uploads
+/uploads/*
+!uploads/.gitkeep
+
+# API keys and secrets (IMPORTANT!)
+.env
+.env.local
+secrets.json
+
+# IDE Settings
+.code-workspace

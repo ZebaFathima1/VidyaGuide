@@ -1,0 +1,48 @@
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const TIMEOUT = import.meta.env.VITE_API_TIMEOUT || 30000
+
+// Create axios instance
+const api = axios.create({
+  baseURL: API_URL,
+  timeout: TIMEOUT,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+// Request interceptor - Add auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// Response interceptor - Handle errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle 401 - Unauthorized
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      window.location.href = '/login'
+    }
+
+    // Handle 403 - Forbidden
+    if (error.response?.status === 403) {
+      console.error('Access forbidden')
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+export default api
