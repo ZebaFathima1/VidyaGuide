@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🎓 VidyaMitra: AI-Powered Career Intelligence Platform
 
 [![Status](https://img.shields.io/badge/Status-Active-brightgreen)]()
@@ -424,3 +425,6 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 [⬆ back to top](#-vidyamitra-ai-powered-career-intelligence-platform)
 
 </div>
+=======
+# VidyaGuide
+>>>>>>> efa3883cb90fe0b2af1559fd014f939362594062
