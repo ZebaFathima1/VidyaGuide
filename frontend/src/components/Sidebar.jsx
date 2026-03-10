@@ -11,6 +11,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { path: '/interview', label: 'Interview', icon: '🎤' },
     { path: '/jobs', label: 'Jobs', icon: '💼' },
     { path: '/progress', label: 'Progress', icon: '📊' },
+    { path: '/feedback', label: 'Feedback', icon: '💬' },
+    { path: '/profile', label: 'Profile', icon: '👤' },
   ]
 
   return (

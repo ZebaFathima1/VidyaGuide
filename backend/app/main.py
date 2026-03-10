@@ -25,8 +25,10 @@ app = FastAPI(
 # CORS Middleware Configuration
 allowed_origins = [
     "http://localhost:5173",      # Local React dev server
+    "http://localhost:5174", "http://localhost:5175", "http://localhost:5176",
     "http://localhost:3000",      # Alternative React port
     "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174", "http://127.0.0.1:5175", "http://127.0.0.1:5176",
     "http://127.0.0.1:3000",
 ]
 
@@ -39,18 +41,9 @@ app.add_middleware(
 )
 
 # ==================== ROUTERS ====================
-# Import routers here as they're created
-# from app.routers import resume, evaluate, plan, quiz, interview, jobs, progress
-# from app.routers import auth
+from app.routers import gemini
 
-# app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-# app.include_router(resume.router, prefix="/api/resume", tags=["Resume Processing"])
-# app.include_router(evaluate.router, prefix="/api/evaluate", tags=["Skill Evaluation"])
-# app.include_router(plan.router, prefix="/api/plan", tags=["Training Plans"])
-# app.include_router(quiz.router, prefix="/api/quiz", tags=["Quiz & Assessment"])
-# app.include_router(interview.router, prefix="/api/interview", tags=["Mock Interview"])
-# app.include_router(jobs.router, prefix="/api/jobs", tags=["Job Recommendations"])
-# app.include_router(progress.router, prefix="/api/progress", tags=["Progress Tracking"])
+app.include_router(gemini.router, prefix="/api/gemini", tags=["Gemini AI"])
 
 # ==================== ROOT ENDPOINTS ====================
 

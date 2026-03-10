@@ -1,7 +1,12 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Upload, CheckCircle, AlertCircle, Zap } from 'lucide-react'
+import { analyzeResumeWithGemini } from '../utils/geminiClient'
+import { extractTextFromFile } from '../utils/fileExtractor'
+import { saveResumeToSupabase } from '../utils/supabaseClient'
 
 export default function ResumePage() {
+  const navigate = useNavigate()
   const [file, setFile] = useState(null)
   const [analyzed, setAnalyzed] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -94,7 +99,7 @@ export default function ResumePage() {
     return Math.min(score, 95)
   }
 
-  const analyzeResume = (text) => {
+  const analyzeResumeLocally = (text) => {
     if (!text || text.trim().length === 0) {
       throw new Error('Resume file is empty')
     }
@@ -186,28 +191,43 @@ export default function ResumePage() {
     setError(null)
 
     try {
-      const reader = new FileReader()
-      
-      reader.onload = (e) => {
-        try {
-          const text = e.target.result
-          const data = analyzeResume(text)
-          setAnalysisData(data)
-          setAnalyzed(true)
-        } catch (err) {
-          setError('❌ Error analyzing file: ' + err.message)
-        }
-        setLoading(false)
+      const text = await extractTextFromFile(file)
+      if (!text || text.trim().length === 0) {
+        throw new Error('Could not extract text from file. Try a different format (TXT works best).')
       }
 
-      reader.onerror = () => {
-        setError('❌ Failed to read file')
-        setLoading(false)
+      const localData = analyzeResumeLocally(text)
+      let geminiData = null
+
+      try {
+        geminiData = await analyzeResumeWithGemini(text)
+      } catch (aiError) {
+        console.error('Gemini resume analysis failed', aiError)
       }
 
-      reader.readAsText(file)
+      const merged = {
+        ...localData,
+        fullName: geminiData?.name || localData.fullName,
+        email: geminiData?.email || localData.email,
+        phone: geminiData?.phone || localData.phone,
+        score: typeof geminiData?.score === 'number' ? geminiData.score : localData.score,
+        geminiSummary: geminiData?.summary || null,
+        geminiSuggestions: geminiData?.suggestions || null,
+        geminiRaw: geminiData || null,
+      }
+
+      setAnalysisData(merged)
+      setAnalyzed(true)
+
+      // Persist to localStorage (offline fallback)
+      localStorage.setItem('resumeSkills', JSON.stringify(merged.skills || []))
+      localStorage.setItem('resumeAnalysisData', JSON.stringify(merged))
+
+      // Persist to Supabase (cloud storage)
+      saveResumeToSupabase(merged).catch(console.warn)
     } catch (err) {
-      setError('❌ Error processing file: ' + err.message)
+      setError('❌ Error processing file: ' + (err.message || 'Unknown error'))
+    } finally {
       setLoading(false)
     }
   }
@@ -436,26 +456,62 @@ export default function ResumePage() {
             </div>
           )}
 
+          {/* Gemini summary & suggestions */}
+          {analysisData.geminiSummary && (
+            <div className="card border-l-4 border-indigo-500 bg-indigo-50">
+              <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                <Zap className="w-5 h-5 text-indigo-600" /> AI Summary
+              </h3>
+              <p className="text-gray-800 mb-4">{analysisData.geminiSummary}</p>
+              {analysisData.geminiSuggestions && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Missing / Weak Skills</h4>
+                    <ul className="list-disc list-inside text-gray-700 space-y-1">
+                      {(analysisData.geminiSuggestions.missingSkills || []).map((s, idx) => (
+                        <li key={idx}>{s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Formatting & ATS Tips</h4>
+                    <ul className="list-disc list-inside text-gray-700 space-y-1">
+                      {(analysisData.geminiSuggestions.formatting || []).map((s, idx) => (
+                        <li key={idx}>{s}</li>
+                      ))}
+                      {(analysisData.geminiSuggestions.ats || []).map((s, idx) => (
+                        <li key={`ats-${idx}`}>{s}</li>
+                      ))}
+                      {(analysisData.geminiSuggestions.sections || []).map((s, idx) => (
+                        <li key={`sec-${idx}`}>{s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="card text-center hover:shadow-lg transition cursor-pointer bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200">
+            <div className="card text-center hover:shadow-lg transition bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200">
               <div className="text-4xl mb-2">📚</div>
               <h4 className="font-bold mb-2 text-lg">View Training Plan</h4>
               <p className="text-sm text-gray-600 mb-3">Personalized learning path based on gaps</p>
-              <button className="btn-primary text-sm py-2">Start Learning →</button>
-            </button>
-            <button className="card text-center hover:shadow-lg transition cursor-pointer bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
+              <button onClick={() => navigate('/training')} className="btn-primary text-sm py-2">Start Learning →</button>
+            </div>
+            <div className="card text-center hover:shadow-lg transition bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
               <div className="text-4xl mb-2">❓</div>
               <h4 className="font-bold mb-2 text-lg">Take Skill Quiz</h4>
               <p className="text-sm text-gray-600 mb-3">Test your knowledge on detected skills</p>
-              <button className="btn-primary text-sm py-2">Take Quiz →</button>
-            </button>
-            <button className="card text-center hover:shadow-lg transition cursor-pointer bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
+              <button onClick={() => navigate('/quiz')} className="btn-primary text-sm py-2">Take Quiz →</button>
+            </div>
+            <div className="card text-center hover:shadow-lg transition bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200">
               <div className="text-4xl mb-2">🎤</div>
               <h4 className="font-bold mb-2 text-lg">Mock Interview</h4>
               <p className="text-sm text-gray-600 mb-3">Practice with AI interviewer</p>
-              <button className="btn-primary text-sm py-2">Start Interview →</button>
-            </button>
+              <button onClick={() => navigate('/interview')} className="btn-primary text-sm py-2">Start Interview →</button>
+            </div>
           </div>
 
           {/* Accuracy Info Box */}

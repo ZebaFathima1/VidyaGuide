@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BookOpen, Play, Clock, BarChart3, CheckCircle } from 'lucide-react'
+import { recordCourseStarted } from '../utils/progressTracker'
 
 export default function TrainingPage() {
   const [selectedModule, setSelectedModule] = useState(null)
@@ -228,7 +229,28 @@ export default function TrainingPage() {
             </div>
           </div>
 
-          <button className="btn-primary w-full py-3 font-bold">
+          <button
+            className="btn-primary w-full py-3 font-bold"
+            onClick={() => {
+              const youtubeLinks = {
+                'Python Fundamentals': 'https://www.youtube.com/watch?v=_uQrJ0TkZlc',
+                'Data Structures Essentials': 'https://www.youtube.com/watch?v=BBpAmxU_NQo',
+                'Web Development with React': 'https://www.youtube.com/watch?v=bMknfKXIFA8',
+                'Machine Learning Basics': 'https://www.youtube.com/watch?v=GwIo3gDZCVQ',
+                'Algorithms & Problem Solving': 'https://www.youtube.com/watch?v=8hly31xKli0',
+                'Artificial Intelligence Fundamentals': 'https://www.youtube.com/watch?v=JMUxmLyrhSk',
+                'Database Design & SQL': 'https://www.youtube.com/watch?v=HXV3zeQKqGY',
+                'System Design for Beginners': 'https://www.youtube.com/watch?v=Gk0HzkzvPVk',
+                'Backend Development with Node.js': 'https://www.youtube.com/watch?v=Oe421EPjeBE',
+                'DevOps & Cloud Computing': 'https://www.youtube.com/watch?v=6xJ8bfgZ4bE',
+              }
+              recordCourseStarted(selectedModule.title)
+              const url = youtubeLinks[selectedModule.title]
+              if (url) {
+                window.open(url, '_blank', 'noopener,noreferrer')
+              }
+            }}
+          >
             {completedModules.includes(selectedModule.id) ? '✓ Completed - Restart' : '▶ Start Learning'}
           </button>
         </div>

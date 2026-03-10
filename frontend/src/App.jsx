@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import './index.css'
+import { supabase } from './utils/supabaseClient'
 
 // Components
 import Navbar from './components/Navbar'
@@ -17,19 +18,46 @@ import QuizPage from './pages/QuizPage'
 import InterviewPage from './pages/InterviewPage'
 import JobsPage from './pages/JobsPage'
 import ProgressPage from './pages/ProgressPage'
+import FeedbackPage from './pages/FeedbackPage'
+import ProfilePage from './pages/ProfilePage'
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'))
+  const [session, setSession] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
-  const handleLogin = () => {
-    setIsAuthenticated(true)
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setLoading(false)
+    })
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setSession(null)
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    setIsAuthenticated(false)
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-4xl mb-4">⏳</div>
+          <p className="text-gray-600 font-semibold">Loading VidyaMitra...</p>
+        </div>
+      </div>
+    )
   }
+
+  const isAuthenticated = !!session
 
   return (
     <Router>
@@ -37,10 +65,10 @@ export default function App() {
         {isAuthenticated ? (
           <div className="flex">
             <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-            
+
             <div className="flex-1">
-              <Navbar onLogout={handleLogout} />
-              
+              <Navbar onLogout={handleLogout} session={session} />
+
               <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'} p-6`}>
                 <Routes>
                   <Route path="/" element={<HomePage />} />
@@ -51,6 +79,8 @@ export default function App() {
                   <Route path="/interview" element={<InterviewPage />} />
                   <Route path="/jobs" element={<JobsPage />} />
                   <Route path="/progress" element={<ProgressPage />} />
+                  <Route path="/feedback" element={<FeedbackPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </main>
@@ -58,8 +88,8 @@ export default function App() {
           </div>
         ) : (
           <Routes>
-            <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-            <Route path="/register" element={<RegisterPage onLogin={handleLogin} />} />
+            <Route path="/login" element={<LoginPage onLogin={() => {}} />} />
+            <Route path="/register" element={<RegisterPage onLogin={() => {}} />} />
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>

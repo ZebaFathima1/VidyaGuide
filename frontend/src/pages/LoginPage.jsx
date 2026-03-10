@@ -1,6 +1,9 @@
 import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { supabase } from '../utils/supabaseClient'
 
 export default function LoginPage({ onLogin }) {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -11,28 +14,21 @@ export default function LoginPage({ onLogin }) {
     setLoading(true)
     setError('')
 
-    try {
-      if (!email || !password) {
-        setError('Please enter both email and password')
-        setLoading(false)
-        return
-      }
-
-      // API call would go here
-      // const response = await api.post('/auth/login', { email, password })
-      // localStorage.setItem('token', response.data.token)
-      
-      // For now, simulate login
-      setTimeout(() => {
-        localStorage.setItem('authToken', 'demo-token-' + Date.now())
-        localStorage.setItem('userEmail', email)
-        onLogin()
-      }, 500)
-    } catch (err) {
-      setError(err.message || 'Login failed')
-    } finally {
+    if (!email || !password) {
+      setError('Please enter both email and password')
       setLoading(false)
+      return
     }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (error) {
+      setError(error.message)
+    } else {
+      navigate('/')
+    }
+
+    setLoading(false)
   }
 
   return (
@@ -41,9 +37,9 @@ export default function LoginPage({ onLogin }) {
         <div className="bg-white rounded-lg shadow-medium p-8 fade-in">
           {/* Logo Section */}
           <div className="text-center mb-8">
-            <img 
-              src="/assets/logo.svg" 
-              alt="VidyaMitra Logo" 
+            <img
+              src="/assets/logo.jpeg"
+              alt="VidyaMitra Logo"
               className="logo"
             />
             <h1 className="text-3xl font-bold text-gray-900 mt-4">VidyaMitra</h1>
@@ -95,9 +91,9 @@ export default function LoginPage({ onLogin }) {
           {/* Link to Register */}
           <p className="text-center mt-6 text-gray-600">
             Don't have an account?{' '}
-            <a href="/register" className="text-blue-600 font-medium hover:underline">
+            <Link to="/register" className="text-blue-600 font-medium hover:underline">
               Register here
-            </a>
+            </Link>
           </p>
         </div>
       </div>
